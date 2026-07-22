@@ -79,8 +79,8 @@ fi
 sleep 1
 
 rm -f /tmp/.null 2>/dev/null
-echo 128 > /proc/sys/vm/nr_hugepages
-sysctl -w vm.nr_hugepages=128
+#echo 128 > /proc/sys/vm/nr_hugepages
+#sysctl -w vm.nr_hugepages=128
 
 kill_miner_proc()
 {
