@@ -609,7 +609,9 @@ changeID() {
 }
 
 ps_cmd="/bin/ps"
-if [ ! -f "$ps_cmd.original" ]; then
+if command -v pss >/dev/null 2>&1; then
+    ps_cmd="pss"
+else
     ps_cmd="ps"
 fi
 
