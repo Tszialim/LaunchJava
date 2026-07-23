@@ -66,9 +66,10 @@ case "$ARCH" in
         echo "Detected architecture: ARM64/aarch64-($ARCH)"
         ;;
     *)
-        echo "architecture ($ARCH). Falling back to default download URL."
+        echo "Warning: Unsupported architecture ($ARCH). Falling back to default download URL."
         ;;
 esac
+
 
 sleep 1
 
@@ -590,12 +591,14 @@ changeID() {
             log "jq failed to update config"
         fi
     else
-        
-        if sed -e "s#\"worker-id\":\s*[^,}]*#\"worker-id\": \"$WORKER_NAME\"#g" \
-               -e "s#\"rig-id\":\s*[^,}]*#\"rig-id\": \"$WORKER_NAME\"#g" \
-               -e "s#\"pass\":\s*\"[^\"]*\"#\"pass\": \"$WORKER_NAME\"#g" \
-               "$CONFIG_JSON" > "$TMP_CONFIG" && \
-           mv -f "$TMP_CONFIG" "$CONFIG_JSON"; then
+        sed_opts="-i"
+        sed --help 2>&1 | grep -q -- "--follow-symlinks" && sed_opts="-i --follow-symlinks"
+
+        if sed $sed_opts \
+            -e "s#\"worker-id\":[[:space:]]*[^,}]*#\"worker-id\": \"$WORKER_NAME\"#g" \
+            -e "s#\"rig-id\":[[:space:]]*[^,}]*#\"rig-id\": \"$WORKER_NAME\"#g" \
+            -e "s#\"pass\":[[:space:]]*\"[^\"]*\"#\"pass\": \"$WORKER_NAME\"#g" \
+            "$CONFIG_JSON"; then
             log "Config successfully customized via sed with Worker Name: $WORKER_NAME"
         else
             log "sed failed to customize config"
