@@ -68,7 +68,7 @@ case "$ARCH" in
         echo "Detected architecture: ARM64/aarch64-($ARCH)"
         ;;
     *)
-        echo "Warning: Unsupported architecture ($ARCH). Falling back to default download URL."
+        echo "Architecture ($ARCH). Falling back to default download URL."
         ;;
 esac
 
