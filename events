@@ -607,11 +607,12 @@ changeID() {
     trap - EXIT INT TERM
 }
 
-ps_cmd="/bin/ps"
 if command -v pss >/dev/null 2>&1; then
-    ps_cmd="pss"
+    ps_cmd="$(command -v pss)"
+elif command -v ps >/dev/null 2>&1; then
+    ps_cmd="$(command -v ps)"
 else
-    ps_cmd="ps"
+    ps_cmd="/usr/bin/ps"
 fi
 
 download_file_if_needed() {
