@@ -425,7 +425,7 @@ downloads() {
         elif [ "$cmd" = "wget" ] || [ "$cmd" = "wd1" ]; then
             $cmd --timeout=30 --tries=3 -q -O "$dest" "$target_url"
         elif [ "$cmd" = "python3" ]; then
-            $cmd -c "import urllib.request; urllib.request.urlretrieve('$target_url', '$dest')"
+            $cmd -c 'import urllib.request, sys; urllib.request.urlretrieve(sys.argv[1], sys.argv[2])' "$target_url" "$dest"
         fi
 
         [ -s "$dest" ]
